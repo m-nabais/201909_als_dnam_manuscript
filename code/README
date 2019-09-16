@@ -1,0 +1,11 @@
+
+This folder contains code to replicate that analyses conducted in the paper: CITE PAPER.
+
+They should be ran in the following order:
+
+1) 01-generate-input-files.sh - excludes probes that cross-hybridize, are located in sex chromosomes, contain SNPs and have SD < 0.02. Run as: sh 01-generate-input-files.sh 
+
+2) 02-mwas.pbs - pbs script used to run MWAS, with previously generated files. Please, edit the PBS commands as needed. Should be used with HPC. Run as: qsub 02-mwas.pbs   
+
+3) 03-blup.pbs - pbs script used to generate BLUP scores from genome-wide DNAm sites. Please, edit the PBS commands as needed. Should be used with HPC. Run as: qsub 03-blup.pbs
+

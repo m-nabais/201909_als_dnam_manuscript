@@ -1,0 +1,106 @@
+#!/bin/bash
+#PBS -N osca_AU
+#PBS -A UQ-IMB-CNSG
+#PBS -l select=1:ncpus=20:mem=150gb
+#PBS -q normal
+#PBS -l walltime=01:00:00
+#PBS -V
+
+# This script runs BLUP predictions in adjusted methylation AUS, as discovery, and NL methylation dataset, as target
+
+###########################
+## Set working directory ##
+###########################
+
+wd=/gpfs/gpfs01/polaris/Q0286/BRAIN-MEND/2019_AUS_ALS_PCTG_DNAm/data/input_files
+
+#################################
+## Change to working directory ##
+#################################
+
+cd $wd
+
+#########################
+## path to OSCA binary ##
+#########################
+
+osca=/shares/compbio/PCTG/bin/osca
+
+#####################################################
+## Export methylation values in OSCA binary format ##
+#####################################################
+
+# The Australian/Netherlands adjuted ALS datasets
+
+export betas_aus_adj="AUS_ALS_PCTG_qced_normalized_DNAm_autosomes_adjusted-no-xreact-no-SNP-sd0.02"
+export betas_nl_adj="Netherlands_ALS_qced_normalized_autosomes_adjusted_for_BLUP" #This file is not the same as the one used for MWAS because it contains CTP!
+
+# Export phenotype files
+
+export pheno_aus="AUS_ALS_PCTG_case_control_phenotype.txt"
+export pheno_nl="Netherlands_ALS_case_control_phenotype.txt"
+
+# Export covariate files 
+
+export ctp_aus="AUS_ALS_PCTG_CTP.txt"
+export qcovs="AUS_ALS_PCTG_pred_age_smoking.txt"
+export covs="AUS_ALS_PCTG_sex_batch.txt"
+export all_covs="AUS_ALS_PCTG_all_covariates.txt"
+
+############################
+##     OREML analyses     ##
+############################
+
+[ ! -d "../../results" ] && mkdir -p "../../results"
+
+[ ! -d "../../results/OREML" ] && mkdir -p "../../results/OREML"
+
+$osca --reml --orm $betas_aus_adj  --pheno $pheno_aus --reml-est-fix --out ../../results/OREML/${betas_aus_adj}-noCOVS 
+
+$osca --reml --orm $betas_aus_adj --pheno $pheno_aus --qcovar $ctp_aus --reml-est-fix --out  ../../results/OREML/${betas_aus_adj}-with-CTP
+
+$osca --reml --orm $betas_aus_adj --pheno $pheno_aus --qcovar $qcovs --covar $covs --reml-est-fix --out ../../results/OREML/${betas_aus_adj}-with-technical-covs
+
+$osca --reml --orm $betas_aus_adj --pheno $pheno_aus --qcovar $all_covs --reml-est-fix --out ../../results/OREML/${betas_aus_adj}-with-all-covs
+
+# DNAm BLUP
+
+############################
+## Predict random effects ## 
+############################
+
+[ ! -d "$w../../results/OREML/BLUP" ] && mkdir -p "$w../../results/OREML/BLUP"
+
+$osca --reml --orm $betas_aus_adj --pheno $pheno_aus --reml-pred-rand --out ../../results/OREML/BLUP/${betas_aus_adj}
+
+#########################################################
+## Calculates the BLUP solutions for the probe effects ## 
+#########################################################
+
+$osca --befile $betas_aus_adj --blup-probe ../../results/OREML/BLUP/${betas_aus_adj}.indi.blp --out ../../results/OREML/BLUP/${betas_aus_adj}
+
+#########################################################################################
+## Reads score files for probes and generates predicted omics profiles for individuals ##
+#########################################################################################
+
+$osca --befile $betas_nl_adj --score ../../results/OREML/BLUP/${betas_aus_adj}.probe.blp --out ../../results/OREML/BLUP/AUS_to_NL_BLUP
+
+# CTP BLUP
+
+# Get the CTP effect size estimates from OREML
+
+echo -e "Bcell \nCD4T \nCD8T \nMono \nNeu \nNK" > /tmp/temp1.txt
+
+cat ../../results/OREML/${betas_aus_adj}-with-CTP.rsq | tail -6 | cut -f1 > /tmp/temp2.txt
+
+paste /tmp/temp1.txt  /tmp/temp2.txt  > AUS_ALS_PCTG_CTP_effect_sizes.txt
+
+export ctp_effects="AUS_ALS_PCTG_CTP_effect_sizes.txt"
+
+$osca --befile $betas_nl_adj --score $ctp_effects --out ../../results/OREML/BLUP/AUS_to_NL_CTP
+
+# CTP + BLUP
+
+cat $ctp_effects ../../results/OREML/BLUP/${betas_aus_adj}.probe.blp > ../../results/OREML/BLUP/${betas_aus_adj}.probe.ctp.blp
+
+$osca --befile $betas_nl_adj --score ../../results/OREML/BLUP/${betas_aus_adj}.probe.ctp.blp --out ../../results/OREML/BLUP/AUS_to_NL_BLUP_CTP
