@@ -18,4 +18,4 @@ write.table(mwas[mwas$p<0.1,c("Probe", "b")], paste(file[2],file[1], "_0.1_probe
 
 write.table(mwas[mwas$p<0.2,c("Probe", "b")], paste(file[2],file[1], "_0.2_probe.blp", sep=""), quote=F, sep="\t", row.names=F, col.names=F)
 
-write.table(mwas[mwas$p<0.5,c("Probe", "b")], paste(file[2],file[1], "_0.3_probe.blp", sep=""), quote=F, sep="\t", row.names=F, col.names=F)
+write.table(mwas[mwas$p<0.5,c("Probe", "b")], paste(file[2],file[1], "_0.5_probe.blp", sep=""), quote=F, sep="\t", row.names=F, col.names=F)
