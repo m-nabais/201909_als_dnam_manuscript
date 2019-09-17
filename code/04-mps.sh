@@ -36,7 +36,6 @@ export mom="AUS_ALS_PCTG_qced_normalized_DNAm_autosomes_adjusted-no-xreact-no-SN
 
 # Export phenotype & methylation files
 export betas_nl_adj="/gpfs/gpfs01/polaris/Q0286/BRAIN-MEND/2019_AUS_ALS_PCTG_DNAm/data/input_files/Netherlands_ALS_qced_normalized_autosomes_adjusted"
-export pheno_nl="/gpfs/gpfs01/polaris/Q0286/BRAIN-MEND/2019_AUS_ALS_PCTG_DNAm/data/input_files/Netherlands_ALS_case_control_phenotype.txt"
 
 # Export directory to where results will be saved
 
