@@ -1,9 +1,9 @@
 #!/bin/bash
 #PBS -N osca_AU
 #PBS -A UQ-IMB-CNSG
-#PBS -l select=1:ncpus=20:mem=150gb
+#PBS -l select=1:ncpus=20:mem=50gb
 #PBS -q normal
-#PBS -l walltime=24:00:00
+#PBS -l walltime=10:00:00
 #PBS -V
 
 # This script runs MWAS in unadjusted vs adjusted methylation AUS and NL methylation datasets 
@@ -24,7 +24,7 @@ cd $wd
 ## path to OSCA binary ##
 #########################
 
-osca=$wd/software/osca
+osca=/gpfs/gpfs01/polaris/Q0286/BRAIN-MEND/2019_AUS_ALS_PCTG_DNAm/software/osca
 
 #####################################################
 ## Export methylation values in OSCA binary format ##
@@ -52,65 +52,65 @@ export pheno_nl="Netherlands_ALS_case_control_phenotype.txt"
 
 [ ! -d "../../results" ] && mkdir -p "../../results"
 
-[ ! -d "../../result../../results/MWAS" ] && mkdir -p "../../result../../results/MWAS"
+[ ! -d "../../results/MWAS" ] && mkdir -p "../../results/MWAS"
 
 ################################
 ### Calculate 10PCs from ORM ###
 
-$osca --orm ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --pca 10 --out ../../results/MWAS/${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-10PCS --thread-num 20
+$osca --orm ${betas_aus} --pca 10 --out ../../results/MWAS/${betas_aus}-10PCS --thread-num 20
 
-$osca --orm  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --pca 10 --out  ../../results/MWAS/${betas_aus_adj}-no-xreact-no-SNP-sd0.02-10PCS  --thread-num 20
+$osca --orm  ${betas_aus_adj} --pca 10 --out  ../../results/MWAS/${betas_aus_adj}-10PCS  --thread-num 20
 
-$osca --orm ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02  --pca 10 --out ../../results/MWAS/${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-10PCS  --thread-num 20
+$osca --orm ${betas_nl}  --pca 10 --out ../../results/MWAS/${betas_nl}-10PCS  --thread-num 20
 
-$osca --orm  ${betas_nl_adj}-no-xreact-no-SNP-sd0.02 --pca 10 --out ../../results/MWAS/${betas_nl_adj}-no-xreact-no-SNP-sd0.02-10PCS  --thread-num 20
+$osca --orm  ${betas_nl_adj} --pca 10 --out ../../results/MWAS/${betas_nl_adj}-10PCS  --thread-num 20
 
 #######################################
 ### Linear regression no covariates ###
 
 
-$osca --befile ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-noCOVS  --thread-num 20
+$osca --befile ${betas_aus} --linear --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-noCOVS  --thread-num 20
 
-$osca --befile  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-no-xreact-no-SNP-sd0.02-noCOVS  --thread-num 20
+$osca --befile  ${betas_aus_adj} --linear --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-noCOVS  --thread-num 20
 
-$osca --befile ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_nl --out ../../results/MWAS/ ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-noCOVS  --thread-num 20
+$osca --befile ${betas_nl} --linear --pheno $pheno_nl --out ../../results/MWAS/ ${betas_nl}-noCOVS  --thread-num 20
 
-$osca --befile ${betas_nl_adj}-no-xreact-no-SNP-sd0.02  --linear --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-no-xreact-no-SNP-sd0.02-noCOVS --thread-num 20
+$osca --befile ${betas_nl_adj}  --linear --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-noCOVS --thread-num 20
 
 ##############################################
 ### Linear regression with 10PCs from ORM  ###
 
 
-$osca --befile ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_aus --qcovar ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-10PCS.eigenvec --out ../../results/MWAS/${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-with-10PCS --thread-num 20
+$osca --befile ${betas_aus} --linear --pheno $pheno_aus --qcovar ../../results/MWAS/${betas_aus}-10PCS.eigenvec --out ../../results/MWAS/${betas_aus}-with-10PCS --thread-num 20
 
-$osca --befile  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_aus --qcovar  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02-10PCS.eigenvec --out  ../../results/MWAS/${betas_aus_adj}-no-xreact-no-SNP-sd0.02-with-10PCS --thread-num 20
+$osca --befile  ${betas_aus_adj} --linear --pheno $pheno_aus --qcovar  ../../results/MWAS/${betas_aus_adj}-10PCS.eigenvec --out  ../../results/MWAS/${betas_aus_adj}-with-10PCS --thread-num 20
 
-$osca --befile ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02 --linear --pheno $pheno_nl --qcovar  ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-10PCS.eigenvec --out  ../../results/MWAS/${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-with-10PCS --thread-num 20
+$osca --befile ${betas_nl} --linear --pheno $pheno_nl --qcovar  ../../results/MWAS/${betas_nl}-10PCS.eigenvec --out  ../../results/MWAS/${betas_nl}-with-10PCS --thread-num 20
 
-$osca --befile ${betas_nl_adj}-no-xreact-no-SNP-sd0.02  --linear --pheno $pheno_nl --qcovar  ${betas_nl_adj}-no-xreact-no-SNP-sd0.02-10PCS.eigenvec --out ../../results/MWAS/${betas_nl_adj}-no-xreact-no-SNP-sd0.02-with-10PCS --thread-num 20
+$osca --befile ${betas_nl_adj}  --linear --pheno $pheno_nl --qcovar  ../../results/MWAS/${betas_nl_adj}-10PCS.eigenvec --out ../../results/MWAS/${betas_nl_adj}-with-10PCS --thread-num 20
 
 
 ######################
 ######   MOA    ######
 
 
-$osca --befile ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --orm ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --moa --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-MOA --thread-num 20
+$osca --befile ${betas_aus} --orm ${betas_aus} --moa --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-MOA --thread-num 20
 
-$osca --befile  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --orm ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --moa --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-no-xreact-no-SNP-sd0.02-MOA --thread-num 20
+$osca --befile  ${betas_aus_adj} --orm ${betas_aus_adj} --moa --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-MOA --thread-num 20
 
-$osca --befile ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02 --orm  ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02 --moa --pheno $pheno_nl --out  ../../results/MWAS/${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-MOA --thread-num 20
+$osca --befile ${betas_nl} --orm  ${betas_nl} --moa --pheno $pheno_nl --out  ../../results/MWAS/${betas_nl}-MOA --thread-num 20
 
-$osca --befile ${betas_nl_adj}-no-xreact-no-SNP-sd0.02 --orm ${betas_nl_adj}-no-xreact-no-SNP-sd0.02 --moa --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-no-xreact-no-SNP-sd0.02-MOA --thread-num 20
+$osca --befile ${betas_nl_adj} --orm ${betas_nl_adj} --moa --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-MOA --thread-num 20
 
 
 #########################
 ######   MOMENT    ######
 
 
-$osca --befile ${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02 --orm-alg 1 --moment --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-autosomes-no-xreact-no-SNP-sd0.02-MOMENT --thread-num 20
+$osca --befile ${betas_aus} --orm-alg 1 --moment --pheno $pheno_aus --out ../../results/MWAS/${betas_aus}-MOMENT --thread-num 20
 
-$osca --befile  ${betas_aus_adj}-no-xreact-no-SNP-sd0.02 --orm-alg 1 --moment --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-no-xreact-no-SNP-sd0.02-MOMENT --thread-num 20
+$osca --befile  ${betas_aus_adj} --orm-alg 1 --moment --pheno $pheno_aus --out  ../../results/MWAS/${betas_aus_adj}-MOMENT --thread-num 20
 
-$osca --befile ${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02 --orm-alg 1 --moment --pheno $pheno_nl --out  ../../results/MWAS/${betas_nl}-autosomes-no-xreact-no-SNP-sd0.02-MOMENT --thread-num 20
+$osca --befile ${betas_nl} --orm-alg 1 --moment --pheno $pheno_nl --out  ../../results/MWAS/${betas_nl}-MOMENT --thread-num 20
 
-$osca --befile ${betas_nl_adj}-no-xreact-no-SNP-sd0.02 --orm-alg 1 --moment --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-no-xreact-no-SNP-sd0.02-MOMENT --thread-num 20
+$osca --befile ${betas_nl_adj} --orm-alg 1 --moment --pheno $pheno_nl --out ../../results/MWAS/${betas_nl_adj}-MOMENT --thread-num 20
