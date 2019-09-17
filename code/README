@@ -9,3 +9,4 @@ They should be ran in the following order:
 
 3) 03-blup.pbs - pbs script used to generate BLUP scores from genome-wide DNAm sites. Please, edit the PBS commands as needed. Should be used with HPC. Run as: qsub 03-blup.pbs
 
+4) 04-mps.sh - bash script used to generate MPS in the Netherlands cohort, based on p-value thresholding of previously generated MWAS results. Should be used as: sh 04-mps.sh
